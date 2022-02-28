@@ -70,7 +70,7 @@ def encrypt(message, key):
     prob_of_random_char = .05
     ciphertext = []
 
-    while ciphertext_pointer < 499 + numb_random_characters:
+    while ciphertext_pointer < len(message) + numb_random_characters:
         coin_value = random.randint(0, 100) / 100
         if prob_of_random_char < coin_value <= 1:
             # substitute the letter with its corresponding value in key[]
@@ -93,7 +93,8 @@ def create_ciphers():
     """
     f = open('ciphertext_examples.txt', 'w')
     for i in range(20):
-        plaintext = pic_random_message()
+        # plaintext = pic_random_message()
+        plaintext = 'blistered pilfers tortoni smeltery trimmings alefs particulate overachiever moonset rotates harshens imagist stuffer lacrosses outflanked twirlier clarence publishable protectional changeover assurers rankness lingua gladding leaseback invalided farcer favouring baldpates glottic outdates proctological unlikely submerse amulets stolonic freaking frizzlers brickyard hyped'
         ciphertext = encrypt(plaintext, encryption_key)
         line = plaintext + '\t' + ciphertext + "\n"
         f.write(line)
