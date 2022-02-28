@@ -32,20 +32,30 @@ def digram_distribution(str):
     return digrams
 
 def decrypt(ciphertext):
-    unigrams = {}
+    # First, we establish the distribution of characters
+    d_text = ' '.join(load_dictionary())
+    d_udist = list(unigram_distribution(d_text).items())
+    d_ddist = list(digram_distribution(d_text).items())
 
-    for c in ciphertext:
-        if c in unigrams:
-            unigrams[c] += 1
-        else:
-            unigrams[c] = 1
+    # These arrays of types are sorted by their second term, which is the frequency of the n-gram
+    d_udist.sort(key=lambda x: x[1], reverse=True)
+    d_ddist.sort(key=lambda x: x[1], reverse=True)
+
+    print(d_udist)
+    # print(d_ddist)
+
 
 
 
 if __name__ == "__main__":
-    import sys
+    # import sys
     # arg = sys.argv[1]
 
+    with open('test2_ciphertext.txt', 'r') as f:
+        ciphertext = f.readline()
+    
+    decrypt(ciphertext)
+
     # print(load_dictionary())
-    print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
-    print(digram_distribution('lacrosses protectional blistered leaseback assurers'))
+    # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
+    # print(digram_distribution('lacrosses protectional blistered leaseback assurers'))
