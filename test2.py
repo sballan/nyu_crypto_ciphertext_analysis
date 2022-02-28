@@ -41,7 +41,23 @@ def decrypt(ciphertext):
     d_udist.sort(key=lambda x: x[1], reverse=True)
     d_ddist.sort(key=lambda x: x[1], reverse=True)
 
-    print(d_udist)
+    c_udist = list(unigram_distribution(ciphertext).items())
+    c_udist.sort(key=lambda x: x[1], reverse=True)
+
+    key_map = {}
+
+    for i in range(len(d_udist)):
+        d_gram = d_udist[i][0]
+        c_gram = c_udist[i][0]
+        key_map[c_gram] = d_gram
+    
+    message = ""
+    for c in ciphertext:
+        if key_map.get(c):
+            message += key_map[c]
+
+
+    print(message)
     # print(d_ddist)
 
 
