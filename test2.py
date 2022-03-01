@@ -1,3 +1,6 @@
+from math import dist
+import Levenshtein
+
 def load_dictionary():
     with open("dictionary_2.txt") as f:
         # We first seek to location in the file where the words begin
@@ -31,6 +34,20 @@ def digram_distribution(str):
     
     return digrams
 
+def match_closest_word(str): 
+    d_words = load_dictionary()
+    
+    closest_word = None
+    closest_distance = 100000  # longer than any message we'll get
+    
+    for word in d_words:
+        distance = Levenshtein.distance(str, word)
+        if distance < closest_distance:
+            closest_word = word
+            closest_distance = distance
+
+    return (closest_word, closest_distance)
+
 def decrypt(ciphertext):
     # First, we establish the distribution of characters
     d_text = ' '.join(load_dictionary())
@@ -51,13 +68,16 @@ def decrypt(ciphertext):
         c_gram = c_udist[i][0]
         key_map[c_gram] = d_gram
     
-    message = ""
+    message_with_salt = ""
     for c in ciphertext:
         if key_map.get(c):
-            message += key_map[c]
+            message_with_salt += key_map[c]
 
+    message = []
+    for word in message_with_salt.split(' '):
+        message.append(match_closest_word(word)[0])
 
-    print(message)
+    print(' '.join(message))
     # print(d_ddist)
 
 
