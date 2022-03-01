@@ -93,8 +93,7 @@ def create_ciphers():
     """
     f = open('ciphertext_examples.txt', 'w')
     for i in range(20):
-        # plaintext = pic_random_message()
-        plaintext = 'blistered pilfers tortoni smeltery trimmings alefs particulate overachiever moonset rotates harshens imagist stuffer lacrosses outflanked twirlier clarence publishable protectional changeover assurers rankness lingua gladding leaseback invalided farcer favouring baldpates glottic outdates proctological unlikely submerse amulets stolonic freaking frizzlers brickyard hyped'
+        plaintext = pic_random_message()
         ciphertext = encrypt(plaintext, encryption_key)
         line = plaintext + '\t' + ciphertext + "\n"
         f.write(line)
