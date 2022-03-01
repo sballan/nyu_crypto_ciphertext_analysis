@@ -1,4 +1,3 @@
-from math import dist
 import Levenshtein
 
 def load_dictionary():
@@ -48,16 +47,58 @@ def match_closest_word(str):
 
     return (closest_word, closest_distance)
 
+def clean_text(text):
+    valid_bigrams = set()
+    d_words = load_dictionary()
+
+    for word in d_words:
+        valid_bigrams.add(" " + word[0])
+        valid_bigrams.add(word[-1] + " ")
+
+        for i in range(0, len(word) - 1):
+            valid_bigrams.add(word[i:i+2])
+        
+    # With a list of all valid bigrams, we can clean up our text
+    # If we have two invalid bigrams in a row of three characters, 
+    # we can remove the middle character
+    output = ""
+    cursor = 0
+    lookahead = cursor + 1
+
+    while cursor < len(text):
+        bigram1 = text[cursor:cursor+2]
+
+        if bigram1 in valid_bigrams:
+            output += bigram1[0]
+            cursor += 1
+            lookahead = cursor + 1
+            next
+        else:
+            bigram2 = text[lookahead:lookahead+2]
+            while (lookahead < len(text)-1) and (bigram2 not in valid_bigrams):
+                lookahead += 1
+                bigram2 = text[lookahead:lookahead+2]
+
+            output += bigram1[0]
+
+            if bigram2 in valid_bigrams:
+                output
+
+
 def decrypt(ciphertext):
     # First, we establish the distribution of characters
     d_text = ' '.join(load_dictionary())
+    # unigrams
     d_udist = list(unigram_distribution(d_text).items())
+    # bigrams
     d_ddist = list(digram_distribution(d_text).items())
 
     # These arrays of types are sorted by their second term, which is the frequency of the n-gram
+    # d_udist is the distribution of unigrams
     d_udist.sort(key=lambda x: x[1], reverse=True)
     d_ddist.sort(key=lambda x: x[1], reverse=True)
 
+    # c_udist is the distribution of unigrams
     c_udist = list(unigram_distribution(ciphertext).items())
     c_udist.sort(key=lambda x: x[1], reverse=True)
 
@@ -79,9 +120,6 @@ def decrypt(ciphertext):
 
     print(' '.join(message))
     # print(d_ddist)
-
-
-
 
 if __name__ == "__main__":
     # import sys
