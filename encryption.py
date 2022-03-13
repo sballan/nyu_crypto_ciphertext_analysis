@@ -70,7 +70,7 @@ def encrypt(message, key):
     prob_of_random_char = .05
     ciphertext = []
 
-    while ciphertext_pointer < 499 + numb_random_characters:
+    while ciphertext_pointer < len(message) + numb_random_characters:
         coin_value = random.randint(0, 100) / 100
         if prob_of_random_char < coin_value <= 1:
             # substitute the letter with its corresponding value in key[]
