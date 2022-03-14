@@ -8,11 +8,11 @@ def dictionary_string():
         f.seek(10)
         # We return a newline separated list of dictionary words, with leading
         #  and trailing whitespace removed
-        return f.read().strip()
+        return f.read().strip().replace("\n", " ")
 
 @cache
 def dictionary_words():
-    return dictionary_string().split('\n')
+    return dictionary_string().split(' ')
 
 def unigram_distribution(str):
     unigrams = {}
@@ -25,7 +25,6 @@ def unigram_distribution(str):
     
     return unigrams
 
-
 def match_closest_word(str, d_words): 
     closest_word = None
     closest_distance = 100000  # longer than any message we'll get
@@ -37,8 +36,6 @@ def match_closest_word(str, d_words):
             closest_distance = distance
 
     return (closest_word, closest_distance)
-
-
 
 def decrypt(ciphertext, plaintext_length=500):
     # First, we establish the distribution of characters
@@ -91,7 +88,7 @@ def decrypt(ciphertext, plaintext_length=500):
                 pl = pe + 1
                 l_match_quality = -1 # -1 means no match has been found
                 # skip ahead to the next space
-                while pl < len(m_rchars) and m_rchars[pl] != ' ': 
+                while pl < len(m_rchars)-1 and m_rchars[pl] != ' ': 
                     pl += 1
 
                 if m_rchars[pl] == ' ':
