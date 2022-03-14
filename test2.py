@@ -66,14 +66,60 @@ def decrypt(ciphertext, plaintext_length=500):
         c_gram = c_udist[i][0]
         key_map[c_gram] = d_gram
     
-    message_with_rchars = ""
+    m_rchars = ""
     for c in ciphertext:
         if key_map.get(c):
-            message_with_rchars += key_map[c]
+            m_rchars += key_map[c]
+
+    found = False
+    ps = 0 # start pointer
+    pe = 0 # end pointer
+    pl = pe # lookahead pointer
 
     message = []
-    for word in message_with_rchars.split(' '):
-        message.append(match_closest_word(word)[0])
+    while pe < len(m_rchars):
+        # skip ahead to the next space
+        while pe < len(m_rchars) and m_rchars[pe] != ' ': 
+            pe += 1
+
+        if m_rchars[pe] == " ":
+            substr = m_rchars[ps:pe]
+            f_word, f_dist = match_closest_word(substr)
+
+            match_quality = f_dist - (len(substr) - len(f_word)) # zero is a perfect match
+
+            lookahead_checked = False
+            while lookahead_checked == False: 
+                pl = pe + 1
+                l_match_quality = -1 # -1 means no match has been found
+                # skip ahead to the next space
+                while pl < len(m_rchars) and m_rchars[pl] != ' ': 
+                    pl += 1
+
+                if m_rchars[pl] == ' ':
+                    l_substr = m_rchars[ps:pl]
+                    lf_word, lf_dist = match_closest_word(l_substr)
+
+                    l_match_quality = lf_dist - (len(l_substr) - len(lf_word))
+                    if l_match_quality < 0: raise("l_match_quality cannot be less than zero!")
+
+                    if l_match_quality < match_quality:
+                        substr = l_substr
+                        f_word, f_dist = lf_word, lf_dist
+                        match_quality = l_match_quality
+                        pe = pl
+                    else: 
+                        lookahead_checked = True
+                else: 
+                    lookahead_checked = True
+           
+            message.append(f_word)
+            ps = pe + 1
+            pe += 2
+        else:
+            # we're at the end of the string, we need to handle partial matches now
+            pass
+        
 
     print(' '.join(message))
     # print(d_ddist)
