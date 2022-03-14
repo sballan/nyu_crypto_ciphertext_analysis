@@ -80,7 +80,7 @@ def decrypt(ciphertext, plaintext_length=500):
             substr = m_rchars[ps:pe]
             f_word, f_dist = match_closest_word(substr, dictionary_words())
 
-            match_quality = f_dist - (len(substr) - len(f_word)) # zero is a perfect match
+            match_quality = f_dist / len(substr)
 
             lookahead_checked = False
             while lookahead_checked == False: 
@@ -94,7 +94,7 @@ def decrypt(ciphertext, plaintext_length=500):
                     l_substr = m_rchars[ps:pl]
                     lf_word, lf_dist = match_closest_word(l_substr, dictionary_words())
 
-                    l_match_quality = lf_dist - (len(l_substr) - len(lf_word))
+                    l_match_quality = lf_dist / len(l_substr)
                     if l_match_quality < 0: raise("l_match_quality cannot be less than zero!")
 
                     if l_match_quality < match_quality:
