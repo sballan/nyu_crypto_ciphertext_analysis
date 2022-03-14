@@ -1,11 +1,18 @@
 import Levenshtein
+from functools import cache
 
-def dictionary_words():
+@cache
+def dictionary_string():
     with open("dictionary_2.txt") as f:
         # We first seek to location in the file where the words begin
         f.seek(10)
-        # We read the words into an array
-        return f.read().strip().split('\n')
+        # We return a newline separated list of dictionary words, with leading
+        #  and trailing whitespace removed
+        return f.read().strip()
+
+@cache
+def dictionary_words():
+    return dictionary_string().split('\n')
 
 def unigram_distribution(str):
     unigrams = {}
@@ -50,20 +57,20 @@ def match_closest_word(str):
 
 def decrypt(ciphertext):
     # First, we establish the distribution of characters
-    d_text = ' '.join(dictionary_words())
+    d_text = dictionary_string()
     # unigrams
     d_udist = list(unigram_distribution(d_text).items())
     # bigrams
-    d_ddist = list(digram_distribution(d_text).items())
+    # d_ddist = list(digram_distribution(d_text).items())
 
     # These arrays of types are sorted by their second term, which is the frequency of the n-gram
     # d_udist is the distribution of unigrams
     d_udist.sort(key=lambda x: x[1], reverse=True)
-    d_ddist.sort(key=lambda x: x[1], reverse=True)
+    # d_ddist.sort(key=lambda x: x[1], reverse=True)
 
     # c_udist is the distribution of unigrams
     c_udist = list(unigram_distribution(ciphertext).items())
-    c_udist.sort(key=lambda x: x[1], reverse=True)
+    # c_udist.sort(key=lambda x: x[1], reverse=True)
 
     key_map = {}
 
@@ -72,13 +79,13 @@ def decrypt(ciphertext):
         c_gram = c_udist[i][0]
         key_map[c_gram] = d_gram
     
-    message_with_salt = ""
+    message_with_rchars = ""
     for c in ciphertext:
         if key_map.get(c):
-            message_with_salt += key_map[c]
+            message_with_rchars += key_map[c]
 
     message = []
-    for word in message_with_salt.split(' '):
+    for word in message_with_rchars.split(' '):
         message.append(match_closest_word(word)[0])
 
     print(' '.join(message))
