@@ -1,6 +1,6 @@
 import Levenshtein
 
-def load_dictionary():
+def dictionary_words():
     with open("dictionary_2.txt") as f:
         # We first seek to location in the file where the words begin
         f.seek(10)
@@ -34,7 +34,7 @@ def digram_distribution(str):
     return digrams
 
 def match_closest_word(str): 
-    d_words = load_dictionary()
+    d_words = dictionary_words()
     
     closest_word = None
     closest_distance = 100000  # longer than any message we'll get
@@ -49,7 +49,7 @@ def match_closest_word(str):
 
 def clean_text(text):
     valid_bigrams = set()
-    d_words = load_dictionary()
+    d_words = dictionary_words()
 
     for word in d_words:
         valid_bigrams.add(" " + word[0])
@@ -87,7 +87,7 @@ def clean_text(text):
 
 def decrypt(ciphertext):
     # First, we establish the distribution of characters
-    d_text = ' '.join(load_dictionary())
+    d_text = ' '.join(dictionary_words())
     # unigrams
     d_udist = list(unigram_distribution(d_text).items())
     # bigrams
@@ -121,6 +121,9 @@ def decrypt(ciphertext):
     print(' '.join(message))
     # print(d_ddist)
 
+
+
+
 if __name__ == "__main__":
     # import sys
     # arg = sys.argv[1]
@@ -130,6 +133,6 @@ if __name__ == "__main__":
     
     decrypt(ciphertext)
 
-    # print(load_dictionary())
+    # print(dictionary_words())
     # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
     # print(digram_distribution('lacrosses protectional blistered leaseback assurers'))
