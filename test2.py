@@ -77,7 +77,7 @@ def decrypt(ciphertext, plaintext_length=500):
     message = ""
     while pe < len(m_rchars):
         # skip ahead to the next space
-        while pe < len(m_rchars) and m_rchars[pe] != ' ': 
+        while pe < len(m_rchars)-1 and m_rchars[pe] != ' ': 
             pe += 1
 
         if m_rchars[pe] == " ":
@@ -120,6 +120,8 @@ def decrypt(ciphertext, plaintext_length=500):
             
             f_word, f_dist = match_closest_word(m_rchars[ps:pe], partial_dict_words)
             message += (" " + f_word)
+
+            pe += 1
             
     print(' '.join(message))
     # print(d_ddist)
