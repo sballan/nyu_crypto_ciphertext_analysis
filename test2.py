@@ -52,7 +52,7 @@ def decrypt(ciphertext, plaintext_length=500):
 
     # c_udist is the distribution of unigrams
     c_udist = list(unigram_distribution(ciphertext).items())
-    # c_udist.sort(key=lambda x: x[1], reverse=True)
+    c_udist.sort(key=lambda x: x[1], reverse=True)
 
     key_map = {}
 
