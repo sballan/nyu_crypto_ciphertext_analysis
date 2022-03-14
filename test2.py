@@ -41,7 +41,8 @@ def match_closest_word(str):
     return (closest_word, closest_distance)
 
 
-def decrypt(ciphertext):
+
+def decrypt(ciphertext, plaintext_length=500):
     # First, we establish the distribution of characters
     d_text = dictionary_string()
     # unigrams
