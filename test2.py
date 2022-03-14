@@ -66,7 +66,6 @@ def decrypt(ciphertext, plaintext_length=500):
         if key_map.get(c):
             m_rchars += key_map[c]
 
-    found = False
     ps = 0 # start pointer
     pe = 0 # end pointer
     pl = pe # lookahead pointer
