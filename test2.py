@@ -26,9 +26,7 @@ def unigram_distribution(str):
     return unigrams
 
 
-def match_closest_word(str): 
-    d_words = dictionary_words()
-    
+def match_closest_word(str, d_words): 
     closest_word = None
     closest_distance = 100000  # longer than any message we'll get
     
@@ -76,7 +74,7 @@ def decrypt(ciphertext, plaintext_length=500):
     pe = 0 # end pointer
     pl = pe # lookahead pointer
 
-    message = []
+    message = ""
     while pe < len(m_rchars):
         # skip ahead to the next space
         while pe < len(m_rchars) and m_rchars[pe] != ' ': 
@@ -84,7 +82,7 @@ def decrypt(ciphertext, plaintext_length=500):
 
         if m_rchars[pe] == " ":
             substr = m_rchars[ps:pe]
-            f_word, f_dist = match_closest_word(substr)
+            f_word, f_dist = match_closest_word(substr, dictionary_words())
 
             match_quality = f_dist - (len(substr) - len(f_word)) # zero is a perfect match
 
@@ -98,7 +96,7 @@ def decrypt(ciphertext, plaintext_length=500):
 
                 if m_rchars[pl] == ' ':
                     l_substr = m_rchars[ps:pl]
-                    lf_word, lf_dist = match_closest_word(l_substr)
+                    lf_word, lf_dist = match_closest_word(l_substr, dictionary_words())
 
                     l_match_quality = lf_dist - (len(l_substr) - len(lf_word))
                     if l_match_quality < 0: raise("l_match_quality cannot be less than zero!")
@@ -113,14 +111,16 @@ def decrypt(ciphertext, plaintext_length=500):
                 else: 
                     lookahead_checked = True
            
-            message.append(f_word)
+            message += (" " + f_word)
             ps = pe + 1
             pe += 2
         else:
-            # we're at the end of the string, we need to handle partial matches now
-            pass
-        
-
+            leftover = (plaintext_length - len(message))
+            partial_dict_words = [word[0:leftover+1] for word in dictionary_words()]
+            
+            f_word, f_dist = match_closest_word(m_rchars[ps:pe], partial_dict_words)
+            message += (" " + f_word)
+            
     print(' '.join(message))
     # print(d_ddist)
 
