@@ -119,7 +119,7 @@ def decrypt(ciphertext, plaintext_length=500):
 
             pe += 1
             
-    print(' '.join(message))
+    print(message)
     # print(d_ddist)
 
 
