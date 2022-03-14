@@ -70,7 +70,7 @@ def decrypt(ciphertext, plaintext_length=500):
     pe = 0 # end pointer
     pl = pe # lookahead pointer
 
-    message = ""
+    message = []
     while pe < len(m_rchars):
         # skip ahead to the next space
         while pe < len(m_rchars)-1 and m_rchars[pe] != ' ': 
@@ -107,20 +107,19 @@ def decrypt(ciphertext, plaintext_length=500):
                 else: 
                     lookahead_checked = True
            
-            message += (" " + f_word)
+            message.append(f_word)
             ps = pe + 1
             pe += 2
         else:
-            leftover = (plaintext_length - len(message))
+            leftover = (plaintext_length - len(' '.join(message)))
             partial_dict_words = [word[0:leftover+1] for word in dictionary_words()]
             
             f_word, f_dist = match_closest_word(m_rchars[ps:pe], partial_dict_words)
-            message += (" " + f_word)
+            message.append(f_word)
 
             pe += 1
             
-    print(message)
-    # print(d_ddist)
+    return ' '.join(message)
 
 
 
@@ -129,10 +128,16 @@ if __name__ == "__main__":
     # import sys
     # arg = sys.argv[1]
 
+    with open('test2_plaintext.txt', 'r') as f:
+        plaintext = f.readline().strip()
+
     with open('test2_ciphertext.txt', 'r') as f:
-        ciphertext = f.readline()
+        ciphertext = f.readline().strip()
     
-    decrypt(ciphertext)
+    attempt = decrypt(ciphertext)
+
+    print(f"Our guess was {Levenshtein.distance(attempt, plaintext)} away")
+    print(f"Guess: \n{attempt}")
 
     # print(dictionary_words())
     # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
