@@ -25,20 +25,6 @@ def unigram_distribution(str):
     
     return unigrams
 
-def digram_distribution(str):
-    digrams = {}
-
-    digram_list = [str[i:i+2] for i in range(0, len(str))]
-
-    for digram in digram_list:
-        if len(digram) < 2: break
-
-        if digram in digrams:
-            digrams[digram] += 1
-        else:
-            digrams[digram] = 1
-    
-    return digrams
 
 def match_closest_word(str): 
     d_words = dictionary_words()
