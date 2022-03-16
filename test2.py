@@ -216,35 +216,22 @@ def keygen(tolerance=1):
     return keys
 
 
+def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
+    # We can use the HistKeyGen class to generate a character distribution for us.
+    # We don't need any of it's other functions
+    ciphertext_chardist = HistKeyGen(ciphertext).char_distribution()
 
-def decrypt(ciphertext, plaintext_length=500):
-    # First, we establish the distribution of characters
-    d_text = dictionary_string()
-    # unigrams
-    d_udist = list(unigram_distribution(d_text).items())
-    # bigrams
-    # d_ddist = list(digram_distribution(d_text).items())
+    deckey = {}
 
-    # These arrays of types are sorted by their second term, which is the frequency of the n-gram
-    # d_udist is the distribution of unigrams
-    d_udist.sort(key=lambda x: x[1], reverse=True)
-    # d_ddist.sort(key=lambda x: x[1], reverse=True)
-
-    # c_udist is the distribution of unigrams
-    c_udist = list(unigram_distribution(ciphertext).items())
-    c_udist.sort(key=lambda x: x[1], reverse=True)
-
-    key_map = {}
-
-    for i in range(len(d_udist)):
-        d_gram = d_udist[i][0]
-        c_gram = c_udist[i][0]
-        key_map[c_gram] = d_gram
+    for i in range(len(histkey)):
+        d_char = histkey[i]
+        c_char = ciphertext_chardist[i][0]
+        deckey[c_char] = d_char
     
     m_rchars = ""
     for c in ciphertext:
-        if key_map.get(c):
-            m_rchars += key_map[c]
+        if deckey.get(c):
+            m_rchars += deckey[c]
 
     ps = 0 # start pointer
     pe = 0 # end pointer
@@ -302,11 +289,29 @@ def decrypt(ciphertext, plaintext_length=500):
     return ' '.join(message)
 
 
+def decrypt(ciphertext, plaintext_length=500):
+    hk_generator = HistKeyGen(dictionary_string(), 1)
+
+    histkey = hk_generator.__next__()
+
+    messages = []
+    counter = 0
+    for histkey in hk_generator:
+        message = perform_decryption_with_histkey(ciphertext, histkey)
+        messages.append(message)
+        counter += 1
+
+        if counter > 10000:
+            break
+
+    return messages
 
 
 
 
-if __name__ == "__main__":
+
+
+if __name__ == "__main__2":
     # keygen(0)
 
     kh = HistKeyGen(dictionary_string(), 1)
@@ -319,7 +324,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__2":
+if __name__ == "__main__":
     # import sys
     # arg = sys.argv[1]
 
@@ -329,10 +334,21 @@ if __name__ == "__main__2":
     with open('test2_ciphertext.txt', 'r') as f:
         ciphertext = f.readline().strip()
     
-    attempt = decrypt(ciphertext)
+    attempts = decrypt(ciphertext)
 
-    print(f"Our guess was {Levenshtein.distance(attempt, plaintext)} away")
-    print(f"Guess: \n{attempt}")
+    best_score = 99999999999
+    best_message = ""
+    scores_considered = 0
+    for attempt in attempts:
+        score = Levenshtein.distance(attempt, plaintext)
+        if score < best_score:
+            best_score = score
+            best_message = attempt
+            scores_considered += 1
+
+
+    print(f"Our guess was {best_score} away, and we considered {scores_considered} best scores out of {len(attempts)}")
+    print(f"Guess: \n{best_message}")
 
     # print(dictionary_words())
     # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
