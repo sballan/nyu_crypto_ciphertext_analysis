@@ -298,8 +298,7 @@ def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
 def decrypt(ciphertext, plaintext_length=500):
     hk_generator = HistKeyGen(dictionary_string(), 1)
 
-    histkey = hk_generator.__next__()
-
+   
     
     CHUNK_SIZE = 10000
     KEY_LIMIT = 100000
