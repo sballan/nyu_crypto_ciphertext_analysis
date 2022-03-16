@@ -307,7 +307,17 @@ def decrypt(ciphertext, plaintext_length=500):
 
 
 if __name__ == "__main__":
-    keygen(0)
+    # keygen(0)
+
+    kh = HistKeyGen(dictionary_string(), 1)
+    
+    s = set()
+    for x in kh:
+        s.add(hash(tuple(x)))
+
+    print(len(s))
+
+
 
 if __name__ == "__main__2":
     # import sys
