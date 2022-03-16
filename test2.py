@@ -1,6 +1,9 @@
 import Levenshtein
+import ray
 from functools import cache
 from itertools import permutations
+
+ray.init()
 
 class HistKeyGen:
     """
@@ -118,7 +121,7 @@ class HistKeyGen:
         return char_dist
 
 
-@cache
+# @cache
 def dictionary_string():
     with open("dictionary_2.txt") as f:
         # We first seek to location in the file where the words begin
@@ -127,7 +130,7 @@ def dictionary_string():
         #  and trailing whitespace removed
         return f.read().strip().replace("\n", " ")
 
-@cache
+# @cache
 def dictionary_words():
     return dictionary_string().split(' ')
 
@@ -215,7 +218,7 @@ def keygen(tolerance=1):
 
     return keys
 
-
+@ray.remote
 def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
     # We can use the HistKeyGen class to generate a character distribution for us.
     # We don't need any of it's other functions
@@ -294,20 +297,28 @@ def decrypt(ciphertext, plaintext_length=500):
 
     histkey = hk_generator.__next__()
 
-    messages = []
+    
+    CHUNK_SIZE = 10000
+    KEY_LIMIT = 100000
     counter = 0
+    task_refs = []
+    messages = []
     for histkey in hk_generator:
-        message = perform_decryption_with_histkey(ciphertext, histkey)
-        messages.append(message)
+        ref = perform_decryption_with_histkey.remote(ciphertext, histkey)
+        task_refs.append(ref)
         counter += 1
 
-        if counter > 10000:
+        if counter > CHUNK_SIZE:
+            tasks_chunk = task_refs[:CHUNK_SIZE]
+            task_refs = task_refs[CHUNK_SIZE:]
+            messages.extend(ray.get(tasks_chunk))
+
+        if counter > KEY_LIMIT:
             break
 
+
+
     return messages
-
-
-
 
 
 
