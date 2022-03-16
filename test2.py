@@ -122,6 +122,9 @@ def decrypt(ciphertext):
     # print(d_ddist)
 
 if __name__ == "__main__":
+    keygen(0)
+
+if __name__ == "__main__2":
     # import sys
     # arg = sys.argv[1]
 
