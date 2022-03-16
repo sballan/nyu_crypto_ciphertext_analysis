@@ -37,6 +37,35 @@ def match_closest_word(str, d_words):
 
     return (closest_word, closest_distance)
 
+def keygen(tolerance=1):
+    # First, we establish the distribution of characters
+    d_text = dictionary_string()
+    # character distribution
+    char_dist = list(unigram_distribution(d_text).items())
+    # We sort the list by the second item in each tuple, which is the frequency of the 
+    # character. The result is a list of characters sort from most to least frequent
+    char_dist.sort(key=lambda x: x[1], reverse=True)
+
+    # This chunking procedure groups the characters into arrays where each sequence of characteres
+    # has a similar frequency
+    chunks = [[]]
+    for i, c_t in char_dist:
+        if len(chunks[-1]) == 0:
+            chunks[-1].append(c_t[0])
+            next
+
+        last_freq = char_dist[i-1][1]
+        if (last_freq - c_t[1]) <= 1:  # TODO: consider adding a condition here which limits size of chunk
+            chunks[-1].append(c_t[0])
+            next
+        else:
+            chunks.append([])
+            next
+
+    
+
+
+
 def decrypt(ciphertext, plaintext_length=500):
     # First, we establish the distribution of characters
     d_text = dictionary_string()
