@@ -18,6 +18,8 @@ class HistKeyGen:
 
         chunks = self.create_chunks()
 
+        chunks.reverse() # This is a funny optimization
+
         # Each item in `chunk_perms` is an array containing all the permutations for the 
         # corresponding chunk in the `chunks` array
         self.chunk_perms = [list(permutations(chunk)) for chunk in chunks]
@@ -68,6 +70,7 @@ class HistKeyGen:
                     else:
                         raise(StopIteration)  
                            
+            key.reverse()
             return key
         else:
             raise(StopIteration)
