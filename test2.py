@@ -49,20 +49,21 @@ def keygen(tolerance=1):
     # This chunking procedure groups the characters into arrays where each sequence of characteres
     # has a similar frequency
     chunks = [[]]
-    for i, c_t in char_dist:
+    for i, c_t in enumerate(char_dist):
         if len(chunks[-1]) == 0:
             chunks[-1].append(c_t[0])
-            next
+            continue
 
         last_freq = char_dist[i-1][1]
-        if (last_freq - c_t[1]) <= 1:  # TODO: consider adding a condition here which limits size of chunk
+        if (last_freq - c_t[1]) <= tolerance:  # TODO: consider adding a condition here which limits size of chunk
             chunks[-1].append(c_t[0])
-            next
+            continue
         else:
             chunks.append([])
-            next
+            continue
 
-    
+
+    return chunks
 
 
 
