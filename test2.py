@@ -304,8 +304,8 @@ def decrypt(ciphertext, plaintext_length=500):
     hk_generator = HistKeyGen(dictionary_string(), 1)
 
    
-    CHUNK_SIZE = 2000
-    KEY_LIMIT = 20000
+    CHUNK_SIZE = 10000
+    KEY_LIMIT = 100000
     counter = 0
     task_refs = []
 
@@ -317,24 +317,26 @@ def decrypt(ciphertext, plaintext_length=500):
         task_refs.append(ref)
         counter += 1
 
-        if counter > CHUNK_SIZE:
+        if (counter % CHUNK_SIZE) == 0:
             tasks_chunk = task_refs[:CHUNK_SIZE]
             task_refs = task_refs[CHUNK_SIZE:]
 
-            print("Process a chunk!")
             results = ray.get(tasks_chunk)
+            
 
             for message, quality in results:
                 if quality < best_quality:
                     best_quality = quality
                     best_message = message
 
+            print(f"Processed chunk at {counter}!")
+
         if counter > KEY_LIMIT:
             print("Finished the chunks!")
             break
 
 
-
+    print("Let's return the chunks")
     return best_message, best_quality
 
 
@@ -365,7 +367,8 @@ if __name__ == "__main__":
     
     message, quality = decrypt(ciphertext)
 
-    print(f"Our guess was {quality} away, where the expected quality is {(len(ciphertext) - len(plaintext)) / len(ciphertext)}")
+    print(f"Our guess quality was {quality}, where the expected quality is {(len(ciphertext) - len(plaintext)) / len(ciphertext)}")
+    print(f"Our guess was {Levenshtein.distance(message, plaintext)} away")
     print(f"Guess: \n{message}")
 
     # print(dictionary_words())
