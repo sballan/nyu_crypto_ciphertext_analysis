@@ -1,5 +1,6 @@
 import Levenshtein
 from functools import cache
+from itertools import permutations
 
 @cache
 def dictionary_string():
@@ -62,8 +63,42 @@ def keygen(tolerance=1):
             chunks.append([])
             continue
 
+    # Each item in `chunk_perms` is an array containing all the permutations for the 
+    # corresponding chunk in the `chunks` array
+    chunk_perms = [list(permutations(chunk)) for chunk in chunks]
 
-    return chunks
+    # We keep track of which permutation we're considering for each chunk
+    chunk_ptrs = [0 for _ in chunks]
+    # A useful variable for the top of our "stack"
+    stack_top = len(chunks)-1
+    # We use a stack metaphor, since we recurse up and down the chunk_perms, resetting
+    # the "top" of the stack as we go "down" the stack. This algorithm could have be implemented
+    # using an actual stack, but I think this is simpler conceptually
+    stack_ptr = stack_ptr
+
+    keys = []
+    finished = False
+
+    while not finished:
+        if stack_top == stack_ptr:
+            if chunk_ptrs[stack_top] < len(chunk_perms[stack_top]):
+                key = []
+                for ptr in chunk_ptrs:
+                    key.extend(chunk_perms[ptr])
+                keys.append(key)        
+                chunk_ptrs[stack_top] += 1
+            else:
+                chunk_ptrs[stack_top] = 0
+                stack_ptr -= 1
+        else:
+            if chunk_ptrs[stack_ptr] < len(chunk_perms[stack_ptr])-1:
+
+
+            
+
+    
+
+    # return chunks
 
 
 
