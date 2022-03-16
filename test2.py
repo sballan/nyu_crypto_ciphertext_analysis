@@ -1,3 +1,4 @@
+from statistics import mean
 import Levenshtein
 import ray
 from functools import cache
@@ -244,6 +245,7 @@ def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
     pl = pe # lookahead pointer
 
     message = []
+    match_qualities = []
     while pe < len(m_rchars):
         # skip ahead to the next space
         while pe < len(m_rchars)-1 and m_rchars[pe] != ' ': 
@@ -279,32 +281,37 @@ def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
                         lookahead_checked = True
                 else: 
                     lookahead_checked = True
-           
+
+            match_qualities.append(match_quality)
             message.append(f_word)
             ps = pe + 1
             pe += 2
         else:
             leftover = (plaintext_length - len(' '.join(message)))
             partial_dict_words = [word[0:leftover+1] for word in dictionary_words()]
-            
-            f_word, f_dist = match_closest_word(m_rchars[ps:pe], partial_dict_words)
+            substring = m_rchars[ps:pe]
+
+            f_word, f_dist = match_closest_word(substring, partial_dict_words)
+            match_qualities.append(f_dist / max(len(substring), len(f_word)))
             message.append(f_word)
 
             pe += 1
             
-    return ' '.join(message)
+    return ' '.join(message), mean(match_qualities)
 
 
 def decrypt(ciphertext, plaintext_length=500):
     hk_generator = HistKeyGen(dictionary_string(), 1)
 
    
-    
-    CHUNK_SIZE = 10000
-    KEY_LIMIT = 100000
+    CHUNK_SIZE = 2000
+    KEY_LIMIT = 20000
     counter = 0
     task_refs = []
-    messages = []
+
+    best_message = ""
+    best_quality = 99999999
+
     for histkey in hk_generator:
         ref = perform_decryption_with_histkey.remote(ciphertext, histkey)
         task_refs.append(ref)
@@ -313,14 +320,22 @@ def decrypt(ciphertext, plaintext_length=500):
         if counter > CHUNK_SIZE:
             tasks_chunk = task_refs[:CHUNK_SIZE]
             task_refs = task_refs[CHUNK_SIZE:]
-            messages.extend(ray.get(tasks_chunk))
+
+            print("Process a chunk!")
+            results = ray.get(tasks_chunk)
+
+            for message, quality in results:
+                if quality < best_quality:
+                    best_quality = quality
+                    best_message = message
 
         if counter > KEY_LIMIT:
+            print("Finished the chunks!")
             break
 
 
 
-    return messages
+    return best_message, best_quality
 
 
 
@@ -346,22 +361,12 @@ if __name__ == "__main__":
 
     with open('test2_ciphertext.txt', 'r') as f:
         ciphertext = f.readline().strip()
+        # ciphertext = f.readline().strip()
     
-    attempts = decrypt(ciphertext)
+    message, quality = decrypt(ciphertext)
 
-    best_score = 99999999999
-    best_message = ""
-    scores_considered = 0
-    for attempt in attempts:
-        score = Levenshtein.distance(attempt, plaintext)
-        if score < best_score:
-            best_score = score
-            best_message = attempt
-            scores_considered += 1
-
-
-    print(f"Our guess was {best_score} away, and we considered {scores_considered} best scores out of {len(attempts)}")
-    print(f"Guess: \n{best_message}")
+    print(f"Our guess was {quality} away, where the expected quality is {(len(ciphertext) - len(plaintext)) / len(ciphertext)}")
+    print(f"Guess: \n{message}")
 
     # print(dictionary_words())
     # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
