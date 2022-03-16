@@ -60,7 +60,7 @@ def keygen(tolerance=1):
             chunks[-1].append(c_t[0])
             continue
         else:
-            chunks.append([])
+            chunks.append([c_t[0]])
             continue
 
     # Each item in `chunk_perms` is an array containing all the permutations for the 
@@ -74,17 +74,16 @@ def keygen(tolerance=1):
     # We use a stack metaphor, since we recurse up and down the chunk_perms, resetting
     # the "top" of the stack as we go "down" the stack. This algorithm could have be implemented
     # using an actual stack, but I think this is simpler conceptually
-    stack_ptr = stack_ptr
+    stack_ptr = stack_top
 
     keys = []
-    finished = False
 
-    while not finished:
+    while stack_ptr >= 0:
         if stack_top == stack_ptr:
             if chunk_ptrs[stack_top] < len(chunk_perms[stack_top]):
                 key = []
-                for ptr in chunk_ptrs:
-                    key.extend(chunk_perms[ptr])
+                for i, ptr in enumerate(chunk_ptrs):
+                    key.extend(chunk_perms[i][ptr])
                 keys.append(key)        
                 chunk_ptrs[stack_top] += 1
             else:
@@ -92,13 +91,13 @@ def keygen(tolerance=1):
                 stack_ptr -= 1
         else:
             if chunk_ptrs[stack_ptr] < len(chunk_perms[stack_ptr])-1:
+                chunk_ptrs[stack_ptr] += 1
+                stack_ptr = stack_top
+            elif stack_ptr >= 0: 
+                chunk_ptrs[stack_ptr] = 0
+                stack_ptr -= 1
 
-
-            
-
-    
-
-    # return chunks
+    return keys
 
 
 
