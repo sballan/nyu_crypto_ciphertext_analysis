@@ -64,6 +64,21 @@ def is_subsequence(a, b):
     return i == len(b)
 
 
+def string_difference(a, b):
+    """
+    Given input strings `a` and `b`, where the length of a is less than or 
+    equal to that of b and the alphabet is {0, 1, 2}, this returns the
+    "one-way" distance of the two strings such that:
+    - the distance is 0 if a is a subsequence of b
+    - the distance is the minimum number of +1 or -1 to each individual 
+      characters in `a` so that this modified `a` becomes a subsequence of `b`
+    
+    For example, string_difference("0120", "101121") is 1 since the minimum 
+    "edits" to `0120` to be a subsequence of `101121` is for `0120` to become
+    `0121`
+    """
+
+
 def decrypt(str):
     candidates = candidates_low_res()
     ciphertext = reduce_resolution(str)
