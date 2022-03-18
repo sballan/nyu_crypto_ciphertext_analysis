@@ -12,10 +12,13 @@ def match_closest_word(str, d_words):
 
     for word in d_words:
         # The word length cannot be greater than the ciphertext substring length
-        if len(word) > len(str): continue 
+        if len(word) > len(str):
+            continue
 
         distance = Levenshtein.distance(str, word)
-        if distance < closest_distance:
+        if (distance < closest_distance) or (
+            (distance == closest_distance) and len(word) > len(closest_word)
+        ):
             closest_word = word
             closest_distance = distance
 
