@@ -22,8 +22,7 @@ def match_closest_word(str, d_words):
     return (closest_word, closest_distance)
 
 
-def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
-    dictionary = Dictionary(d_num)
+def decryption_with_histkey(ciphertext, histkey, d_words, plaintext_length=500):
     # We can use the HistKeyGen class to generate a character distribution for us.
     # We don't need any of it's other functions
     ciphertext_chardist = HistKeyGen(ciphertext).char_distribution()
@@ -55,7 +54,7 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
 
         if m_rchars[pe] == " ":
             substr = m_rchars[ps:pe]
-            f_word, f_dist = match_closest_word(substr, dictionary.words())
+            f_word, f_dist = match_closest_word(substr, d_words)
 
             match_quality = f_dist / len(substr)
 
@@ -69,7 +68,7 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
 
                 if m_rchars[pl] == " ":
                     l_substr = m_rchars[ps:pl]
-                    lf_word, lf_dist = match_closest_word(l_substr, dictionary.words())
+                    lf_word, lf_dist = match_closest_word(l_substr, d_words)
 
                     l_match_quality = lf_dist / len(l_substr)
                     if l_match_quality < 0:
@@ -87,11 +86,12 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
 
             match_qualities.append(match_quality)
             message.append(f_word)
+            # pe is a space, we now want to start one after that space
             ps = pe + 1
             pe += 2
         else:
             leftover = plaintext_length - len(" ".join(message))
-            partial_dict_words = [word[0 : leftover - 1] for word in dictionary.words()]
+            partial_dict_words = [word[0 : leftover - 1] for word in d_words]
             substring = m_rchars[ps:pe]
 
             f_word, f_dist = match_closest_word(substring, partial_dict_words)
@@ -104,14 +104,15 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
 
 
 @ray.remote
-def perform_decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
-    return decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length)
+def perform_decryption_with_histkey(ciphertext, histkey, d_words, plaintext_length=500):
+    return decryption_with_histkey(ciphertext, histkey, d_words, plaintext_length)
 
 
 def decrypt(ciphertext, d_num, plaintext_length=500):
     ray.init()
 
     dictionary = Dictionary(d_num)
+    d_words = dictionary.words()
     hk_generator = HistKeyGen(dictionary.string(), 1)
 
     CHUNK_SIZE = 1000
@@ -125,7 +126,7 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
 
     for histkey in hk_generator:
         ref = perform_decryption_with_histkey.remote(
-            ciphertext, histkey, d_num, plaintext_length
+            ciphertext, histkey, d_words, plaintext_length
         )
         task_refs.append(ref)
         counter += 1
