@@ -112,7 +112,7 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
 
 
 @ray.remote
-def perform_decryption_with_histkey(ciphertext, histkey, d_num,  plaintext_length=500):
+def perform_decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
     return decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length)
 
 
@@ -132,7 +132,9 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
     best_deckey = None
 
     for histkey in hk_generator:
-        ref = perform_decryption_with_histkey.remote(ciphertext, histkey, d_num, plaintext_length)
+        ref = perform_decryption_with_histkey.remote(
+            ciphertext, histkey, d_num, plaintext_length
+        )
         task_refs.append(ref)
         counter += 1
 

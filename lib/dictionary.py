@@ -1,10 +1,10 @@
 import os
-script_dir = os.path.dirname(__file__)
+
 
 class Dictionary:
     def __init__(self, num):
         if num not in [1, 2]:
-            raise(BaseException("Invalid dictionary number!"))
+            raise BaseException("Invalid dictionary number!")
 
         self.__num = num
         self.__string = ""
