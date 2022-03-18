@@ -1,7 +1,9 @@
 import Levenshtein
 import ray
 from statistics import mean
+
 from histkey import HistKeyGen
+from dictionary import Dictionary
 
 
 def dictionary_string():
@@ -30,7 +32,8 @@ def match_closest_word(str, d_words):
     return (closest_word, closest_distance)
 
 
-def decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
+def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
+    dictionary = Dictionary(d_num)
     # We can use the HistKeyGen class to generate a character distribution for us.
     # We don't need any of it's other functions
     ciphertext_chardist = HistKeyGen(ciphertext).char_distribution()
@@ -60,7 +63,7 @@ def decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
 
         if m_rchars[pe] == " ":
             substr = m_rchars[ps:pe]
-            f_word, f_dist = match_closest_word(substr, dictionary_words())
+            f_word, f_dist = match_closest_word(substr, dictionary.words())
 
             match_quality = f_dist / len(substr)
 
@@ -74,7 +77,7 @@ def decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
 
                 if m_rchars[pl] == " ":
                     l_substr = m_rchars[ps:pl]
-                    lf_word, lf_dist = match_closest_word(l_substr, dictionary_words())
+                    lf_word, lf_dist = match_closest_word(l_substr, dictionary.words())
 
                     l_match_quality = lf_dist / len(l_substr)
                     if l_match_quality < 0:
@@ -96,7 +99,7 @@ def decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
             pe += 2
         else:
             leftover = plaintext_length - len(" ".join(message))
-            partial_dict_words = [word[0 : leftover - 1] for word in dictionary_words()]
+            partial_dict_words = [word[0 : leftover - 1] for word in dictionary.words()]
             substring = m_rchars[ps:pe]
 
             f_word, f_dist = match_closest_word(substring, partial_dict_words)
@@ -109,14 +112,15 @@ def decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
 
 
 @ray.remote
-def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
-    return decryption_with_histkey(ciphertext, histkey, plaintext_length)
+def perform_decryption_with_histkey(ciphertext, histkey, d_num,  plaintext_length=500):
+    return decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length)
 
 
-def decrypt(ciphertext, plaintext_length=500):
+def decrypt(ciphertext, d_num, plaintext_length=500):
     ray.init()
 
-    hk_generator = HistKeyGen(dictionary_string(), 1)
+    dictionary = Dictionary(d_num)
+    hk_generator = HistKeyGen(dictionary.string(), 1)
 
     CHUNK_SIZE = 1000
     KEY_LIMIT = 10000
@@ -128,7 +132,7 @@ def decrypt(ciphertext, plaintext_length=500):
     best_deckey = None
 
     for histkey in hk_generator:
-        ref = perform_decryption_with_histkey.remote(ciphertext, histkey)
+        ref = perform_decryption_with_histkey.remote(ciphertext, histkey, d_num, plaintext_length)
         task_refs.append(ref)
         counter += 1
 
@@ -156,18 +160,6 @@ def decrypt(ciphertext, plaintext_length=500):
     return best_message, best_quality, best_deckey
 
 
-if __name__ == "__main__2":
-    # keygen(0)
-
-    kh = HistKeyGen(dictionary_string(), 1)
-
-    s = set()
-    for x in kh:
-        s.add(hash(tuple(x)))
-
-    print(len(s))
-
-
 if __name__ == "__main__":
     # import sys
     # arg = sys.argv[1]
@@ -179,7 +171,7 @@ if __name__ == "__main__":
         ciphertext = f.readline().strip()
         # ciphertext = f.readline().strip()
 
-    message, quality, deckey = decrypt(ciphertext)
+    message, quality, deckey = decrypt(ciphertext, 2)
 
     print(
         f"Our guess quality was {quality}, where the expected quality is {(len(ciphertext) - len(plaintext)) / len(ciphertext)}"
