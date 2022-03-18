@@ -36,6 +36,8 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
     for c in ciphertext:
         if deckey.get(c):
             m_rchars += deckey[c]
+        else:
+            raise BaseException("deckey is missing a character!")
 
     ps = 0  # start pointer
     pe = 0  # end pointer
