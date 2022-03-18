@@ -213,7 +213,7 @@ def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
             pe += 2
         else:
             leftover = (plaintext_length - len(' '.join(message)))
-            partial_dict_words = [word[0:leftover+1] for word in dictionary_words()]
+            partial_dict_words = [word[0:leftover-1] for word in dictionary_words()]
             substring = m_rchars[ps:pe]
 
             f_word, f_dist = match_closest_word(substring, partial_dict_words)
