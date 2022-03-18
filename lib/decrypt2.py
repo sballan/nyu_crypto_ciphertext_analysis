@@ -7,10 +7,13 @@ from dictionary import Dictionary
 
 
 def match_closest_word(str, d_words):
-    closest_word = None
-    closest_distance = 100000  # longer than any message we'll get
+    closest_word = ""
+    closest_distance = len(str)  # longer than any message we'll get
 
     for word in d_words:
+        # The word length cannot be greater than the ciphertext substring length
+        if len(word) > len(str): continue 
+
         distance = Levenshtein.distance(str, word)
         if distance < closest_distance:
             closest_word = word
