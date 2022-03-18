@@ -107,13 +107,13 @@ class HistKeyGen:
         """
         Character distribution of the dictionary text, as a sorted list of tuples (char, frequency)
         """
-        chars = {}
+        chars = {' ':0}
+
+        for c in string.ascii_lowercase:
+            chars[c] = 0
 
         for c in self.d_text:
-            if c in chars:
-                chars[c] += 1
-            else:
-                chars[c] = 1
+            chars[c] += 1
 
         # Get the distribution as a list, so we can sort it
         char_dist = list(chars.items())
