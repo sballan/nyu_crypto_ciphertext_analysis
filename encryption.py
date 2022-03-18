@@ -68,6 +68,9 @@ def encrypt(message, key, prob_of_random_char):
     """
     Encrypts plaintext message with given key as described by encryption algorithm.
     Input: K[26] and message
+    :param message: Plaintext message to encrypt.
+    :param key: Encryption key
+    :param prob_of_random_char: Random character probability.
     :return: ciphertext[L+r]
     """
     ciphertext_pointer = 0
@@ -160,6 +163,7 @@ def test_decryption_algorithm(decryption_function, test_type=1):
 
     # Create a folder to save the results
     folder_name = "results_" + str(random.randint(0, 10000))
+    print("Results saved in folder: " + folder_name)
     os.makedirs(folder_name)
 
     # start with zero random char
@@ -208,7 +212,7 @@ def test_decryption_algorithm(decryption_function, test_type=1):
 
         # increase the random char probability by .1
         random_char_percentage += .1
-    print("Results saved in folder: " + folder_name)
 
 
-test_decryption_algorithm(test2.decrypt, 1)
+
+test_decryption_algorithm(test2.decrypt, 2)
