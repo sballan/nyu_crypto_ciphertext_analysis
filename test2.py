@@ -118,7 +118,7 @@ def decrypt(ciphertext):
     for word in message_with_salt.split(' '):
         message.append(match_closest_word(word)[0])
 
-    print(' '.join(message))
+    return ' '.join(message)
     # print(d_ddist)
 
 if __name__ == "__main__":
