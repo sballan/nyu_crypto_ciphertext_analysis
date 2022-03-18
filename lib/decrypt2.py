@@ -70,7 +70,7 @@ def decryption_with_histkey(ciphertext, histkey, d_num, plaintext_length=500):
 
                     l_match_quality = lf_dist / len(l_substr)
                     if l_match_quality < 0:
-                        raise ("l_match_quality cannot be less than zero!")
+                        raise BaseException("l_match_quality cannot be less than zero!")
 
                     if l_match_quality < match_quality:
                         substr = l_substr
