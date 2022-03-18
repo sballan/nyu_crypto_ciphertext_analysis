@@ -125,11 +125,9 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
         task_refs.append(ref)
         counter += 1
 
-        if (counter % CHUNK_SIZE) == 0:
-            tasks_chunk = task_refs[:CHUNK_SIZE]
-            task_refs = task_refs[CHUNK_SIZE:]
-
-            results = ray.get(tasks_chunk)
+        if (counter % CHUNK_SIZE) == 0 or (counter > KEY_LIMIT):
+            results = ray.get(task_refs)
+            task_refs = []
 
             for message, quality, deckey in results:
                 if quality < best_quality:
@@ -142,6 +140,17 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
         if counter > KEY_LIMIT:
             print("Finished the chunks!")
             break
+
+    # If the keyspace is small, we'll have leftovers
+    leftovers = ray.get(task_refs)
+    if len(leftovers) > 0:
+        for message, quality, deckey in leftovers:
+            if quality < best_quality:
+                best_quality = quality
+                best_message = message
+                best_deckey = deckey
+
+        print(f"Processed chunk at {counter + 1}!")
 
     print("Let's return the chunks")
 
