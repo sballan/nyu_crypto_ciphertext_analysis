@@ -6,19 +6,6 @@ from histkey import HistKeyGen
 from dictionary import Dictionary
 
 
-def dictionary_string():
-    with open("dictionary_2.txt") as f:
-        # We first seek to location in the file where the words begin
-        f.seek(10)
-        # We return a newline separated list of dictionary words, with leading
-        #  and trailing whitespace removed
-        return f.read().strip().replace("\n", " ")
-
-
-def dictionary_words():
-    return dictionary_string().split(" ")
-
-
 def match_closest_word(str, d_words):
     closest_word = None
     closest_distance = 100000  # longer than any message we'll get
@@ -182,6 +169,3 @@ if __name__ == "__main__":
     print(f"Our key was: {deckey}")
     print(f"Guess: \n{message}")
 
-    # print(dictionary_words())
-    # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
-    # print(digram_distribution('lacrosses protectional blistered leaseback assurers'))
