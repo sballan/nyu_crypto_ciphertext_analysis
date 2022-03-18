@@ -1,6 +1,9 @@
 import Levenshtein
-from functools import cache
+import ray
+from statistics import mean
 from itertools import permutations
+
+ray.init()
 
 class HistKeyGen:
     """
@@ -14,6 +17,8 @@ class HistKeyGen:
         self.tolerance = tolerance
 
         chunks = self.create_chunks()
+
+        chunks.reverse() # This is a funny optimization
 
         # Each item in `chunk_perms` is an array containing all the permutations for the 
         # corresponding chunk in the `chunks` array
@@ -65,6 +70,7 @@ class HistKeyGen:
                     else:
                         raise(StopIteration)  
                            
+            key.reverse()
             return key
         else:
             raise(StopIteration)
@@ -101,13 +107,13 @@ class HistKeyGen:
         """
         Character distribution of the dictionary text, as a sorted list of tuples (char, frequency)
         """
-        chars = {}
+        chars = {' ':0}
+
+        for c in string.ascii_lowercase:
+            chars[c] = 0
 
         for c in self.d_text:
-            if c in chars:
-                chars[c] += 1
-            else:
-                chars[c] = 1
+            chars[c] += 1
 
         # Get the distribution as a list, so we can sort it
         char_dist = list(chars.items())
@@ -118,7 +124,6 @@ class HistKeyGen:
         return char_dist
 
 
-@cache
 def dictionary_string():
     with open("dictionary_2.txt") as f:
         # We first seek to location in the file where the words begin
@@ -127,20 +132,8 @@ def dictionary_string():
         #  and trailing whitespace removed
         return f.read().strip().replace("\n", " ")
 
-@cache
 def dictionary_words():
     return dictionary_string().split(' ')
-
-def unigram_distribution(str):
-    unigrams = {}
-
-    for c in str:
-        if c in unigrams:
-            unigrams[c] += 1
-        else:
-            unigrams[c] = 1
-    
-    return unigrams
 
 def match_closest_word(str, d_words): 
     closest_word = None
@@ -154,103 +147,30 @@ def match_closest_word(str, d_words):
 
     return (closest_word, closest_distance)
 
-def keygen(tolerance=1):
-    # First, we establish the distribution of characters
-    d_text = dictionary_string()
-    # character distribution
-    char_dist = list(unigram_distribution(d_text).items())
-    # We sort the list by the second item in each tuple, which is the frequency of the 
-    # character. The result is a list of characters sort from most to least frequent
-    char_dist.sort(key=lambda x: x[1], reverse=True)
+@ray.remote
+def perform_decryption_with_histkey(ciphertext, histkey, plaintext_length=500):
+    # We can use the HistKeyGen class to generate a character distribution for us.
+    # We don't need any of it's other functions
+    ciphertext_chardist = HistKeyGen(ciphertext).char_distribution()
 
-    # This chunking procedure groups the characters into arrays where each sequence of characteres
-    # has a similar frequency
-    chunks = [[]]
-    for i, c_t in enumerate(char_dist):
-        if len(chunks[-1]) == 0:
-            chunks[-1].append(c_t[0])
-            continue
+    deckey = {}
 
-        last_freq = char_dist[i-1][1]
-        if (last_freq - c_t[1]) <= tolerance:  # TODO: consider adding a condition here which limits size of chunk
-            chunks[-1].append(c_t[0])
-            continue
-        else:
-            chunks.append([c_t[0]])
-            continue
-
-    # Each item in `chunk_perms` is an array containing all the permutations for the 
-    # corresponding chunk in the `chunks` array
-    chunk_perms = [list(permutations(chunk)) for chunk in chunks]
-
-    # We keep track of which permutation we're considering for each chunk
-    chunk_ptrs = [0 for _ in chunks]
-    # A useful variable for the top of our "stack"
-    stack_top = len(chunks)-1
-    # We use a stack metaphor, since we recurse up and down the chunk_perms, resetting
-    # the "top" of the stack as we go "down" the stack. This algorithm could have be implemented
-    # using an actual stack, but I think this is simpler conceptually
-    stack_ptr = stack_top
-
-    keys = []
-
-    while stack_ptr >= 0:
-        if stack_top == stack_ptr:
-            if chunk_ptrs[stack_top] < len(chunk_perms[stack_top]):
-                key = []
-                for i, ptr in enumerate(chunk_ptrs):
-                    key.extend(chunk_perms[i][ptr])
-                keys.append(key)        
-                chunk_ptrs[stack_top] += 1
-            else:
-                chunk_ptrs[stack_top] = 0
-                stack_ptr -= 1
-        else:
-            if chunk_ptrs[stack_ptr] < len(chunk_perms[stack_ptr])-1:
-                chunk_ptrs[stack_ptr] += 1
-                stack_ptr = stack_top
-            elif stack_ptr >= 0: 
-                chunk_ptrs[stack_ptr] = 0
-                stack_ptr -= 1
-
-    return keys
-
-
-
-def decrypt(ciphertext, plaintext_length=500):
-    # First, we establish the distribution of characters
-    d_text = dictionary_string()
-    # unigrams
-    d_udist = list(unigram_distribution(d_text).items())
-    # bigrams
-    # d_ddist = list(digram_distribution(d_text).items())
-
-    # These arrays of types are sorted by their second term, which is the frequency of the n-gram
-    # d_udist is the distribution of unigrams
-    d_udist.sort(key=lambda x: x[1], reverse=True)
-    # d_ddist.sort(key=lambda x: x[1], reverse=True)
-
-    # c_udist is the distribution of unigrams
-    c_udist = list(unigram_distribution(ciphertext).items())
-    c_udist.sort(key=lambda x: x[1], reverse=True)
-
-    key_map = {}
-
-    for i in range(len(d_udist)):
-        d_gram = d_udist[i][0]
-        c_gram = c_udist[i][0]
-        key_map[c_gram] = d_gram
+    for i in range(len(histkey)):
+        d_char = histkey[i]
+        c_char = ciphertext_chardist[i][0]
+        deckey[c_char] = d_char
     
     m_rchars = ""
     for c in ciphertext:
-        if key_map.get(c):
-            m_rchars += key_map[c]
+        if deckey.get(c):
+            m_rchars += deckey[c]
 
     ps = 0 # start pointer
     pe = 0 # end pointer
     pl = pe # lookahead pointer
 
     message = []
+    match_qualities = []
     while pe < len(m_rchars):
         # skip ahead to the next space
         while pe < len(m_rchars)-1 and m_rchars[pe] != ' ': 
@@ -286,27 +206,69 @@ def decrypt(ciphertext, plaintext_length=500):
                         lookahead_checked = True
                 else: 
                     lookahead_checked = True
-           
+
+            match_qualities.append(match_quality)
             message.append(f_word)
             ps = pe + 1
             pe += 2
         else:
             leftover = (plaintext_length - len(' '.join(message)))
-            partial_dict_words = [word[0:leftover+1] for word in dictionary_words()]
-            
-            f_word, f_dist = match_closest_word(m_rchars[ps:pe], partial_dict_words)
+            partial_dict_words = [word[0:leftover-1] for word in dictionary_words()]
+            substring = m_rchars[ps:pe]
+
+            f_word, f_dist = match_closest_word(substring, partial_dict_words)
+            match_qualities.append(f_dist / max(len(substring), len(f_word)))
             message.append(f_word)
 
             pe += 1
             
-    return ' '.join(message)
+    return ' '.join(message), mean(match_qualities), deckey
+
+
+def decrypt(ciphertext, plaintext_length=500):
+    hk_generator = HistKeyGen(dictionary_string(), 1)
+
+   
+    CHUNK_SIZE = 10000
+    KEY_LIMIT = 100000
+    counter = 0
+    task_refs = []
+
+    best_message = ""
+    best_quality = 99999999
+    best_deckey = None
+
+    for histkey in hk_generator:
+        ref = perform_decryption_with_histkey.remote(ciphertext, histkey)
+        task_refs.append(ref)
+        counter += 1
+
+        if (counter % CHUNK_SIZE) == 0:
+            tasks_chunk = task_refs[:CHUNK_SIZE]
+            task_refs = task_refs[CHUNK_SIZE:]
+
+            results = ray.get(tasks_chunk)
+            
+
+            for message, quality, deckey in results:
+                if quality < best_quality:
+                    best_quality = quality
+                    best_message = message
+                    best_deckey = deckey
+
+            print(f"Processed chunk at {counter}!")
+
+        if counter > KEY_LIMIT:
+            print("Finished the chunks!")
+            break
+
+
+    print("Let's return the chunks")
+    return best_message, best_quality, best_deckey
 
 
 
-
-
-
-if __name__ == "__main__":
+if __name__ == "__main__2":
     # keygen(0)
 
     kh = HistKeyGen(dictionary_string(), 1)
@@ -319,7 +281,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__2":
+if __name__ == "__main__":
     # import sys
     # arg = sys.argv[1]
 
@@ -328,11 +290,14 @@ if __name__ == "__main__2":
 
     with open('test2_ciphertext.txt', 'r') as f:
         ciphertext = f.readline().strip()
+        # ciphertext = f.readline().strip()
     
-    attempt = decrypt(ciphertext)
+    message, quality, deckey = decrypt(ciphertext)
 
-    print(f"Our guess was {Levenshtein.distance(attempt, plaintext)} away")
-    print(f"Guess: \n{attempt}")
+    print(f"Our guess quality was {quality}, where the expected quality is {(len(ciphertext) - len(plaintext)) / len(ciphertext)}")
+    print(f"Our guess was {Levenshtein.distance(message, plaintext)} away")
+    print(f"Our key was: {deckey}")
+    print(f"Guess: \n{message}")
 
     # print(dictionary_words())
     # print(unigram_distribution('lacrosses protectional blistered leaseback assurers'))
