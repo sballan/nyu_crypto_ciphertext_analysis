@@ -1,6 +1,7 @@
 import string
 from itertools import permutations
 
+
 class HistKeyGen:
     """
     "Histogram Key Generator".  The HistKey is an array of characters that can be used
@@ -14,21 +15,20 @@ class HistKeyGen:
 
         chunks = self.__create_chunks()
 
-        chunks.reverse() # This is a funny optimization
+        chunks.reverse()  # This is a funny optimization
 
-        # Each item in `chunk_perms` is an array containing all the permutations for the 
+        # Each item in `chunk_perms` is an array containing all the permutations for the
         # corresponding chunk in the `chunks` array
         self.chunk_perms = [list(permutations(chunk)) for chunk in chunks]
 
         # We keep track of which permutation we're considering for each chunk
         self.chunk_ptrs = [0 for _ in chunks]
         # A useful variable for the top of our "stack"
-        self.stack_top = len(chunks)-1
+        self.stack_top = len(chunks) - 1
         # We use a stack metaphor, since we recurse up and down the chunk_perms, resetting
         # the "top" of the stack as we go "down" the stack. This algorithm could have be implemented
         # using an actual stack, but I think this is simpler conceptually
         self.stack_ptr = self.stack_top
-    
 
     def __next__(self):
         if self.stack_ptr >= 0:
@@ -36,12 +36,14 @@ class HistKeyGen:
             while len(key) == 0:
                 if self.stack_top == self.stack_ptr:
                     """
-                    We're at the top of the stack, so there is the possibility that we may return a key. 
+                    We're at the top of the stack, so there is the possibility that we may return a key.
                     If the chunk pointer hasn't gotten to the end yet, we can take a snapshot of the whole
-                    stack to create a new key and return it.  Otherwise, we need to pop the top chunk off 
+                    stack to create a new key and return it.  Otherwise, we need to pop the top chunk off
                     the stack.  We do this by setting its chunk pointer to zero, and decrementing the stack pointer.
                     """
-                    if self.chunk_ptrs[self.stack_top] < len(self.chunk_perms[self.stack_top]):
+                    if self.chunk_ptrs[self.stack_top] < len(
+                        self.chunk_perms[self.stack_top]
+                    ):
                         for i, ptr in enumerate(self.chunk_ptrs):
                             key.extend(self.chunk_perms[i][ptr])
 
@@ -57,32 +59,32 @@ class HistKeyGen:
                     to zero, and decrementing the stack pointer.
                     """
                     if self.stack_ptr >= 0:
-                        if self.chunk_ptrs[self.stack_ptr] < len(self.chunk_perms[self.stack_ptr])-1:
+                        if (
+                            self.chunk_ptrs[self.stack_ptr]
+                            < len(self.chunk_perms[self.stack_ptr]) - 1
+                        ):
                             self.chunk_ptrs[self.stack_ptr] += 1
                             self.stack_ptr = self.stack_top
                         else:
                             self.chunk_ptrs[self.stack_ptr] = 0
-                            self.stack_ptr -= 1 
+                            self.stack_ptr -= 1
                     else:
-                        raise(StopIteration)  
-                           
+                        raise (StopIteration)
+
             key.reverse()
             return key
         else:
-            raise(StopIteration)
-
-
+            raise (StopIteration)
 
     def __iter__(self):
         """Needed to conform to the iterator interface"""
         return self
 
-
     def char_distribution(self):
         """
         Character distribution of the dictionary text, as a sorted list of tuples (char, frequency)
         """
-        chars = {' ':0}
+        chars = {" ": 0}
 
         for c in string.ascii_lowercase:
             chars[c] = 0
@@ -92,12 +94,11 @@ class HistKeyGen:
 
         # Get the distribution as a list, so we can sort it
         char_dist = list(chars.items())
-        # We sort the list by the second item in each tuple, which is the frequency of the 
+        # We sort the list by the second item in each tuple, which is the frequency of the
         # character. The result is a list of characters sort from most to least frequent
         char_dist.sort(key=lambda x: x[1], reverse=True)
 
         return char_dist
-
 
     def __create_chunks(self):
         char_dist = self.char_distribution()
@@ -109,13 +110,14 @@ class HistKeyGen:
                 chunks[-1].append(c_t[0])
                 continue
 
-            last_freq = char_dist[i-1][1]
-            if (last_freq - c_t[1]) <= self.tolerance:  # TODO: consider adding a condition here which limits size of chunk
+            last_freq = char_dist[i - 1][1]
+            if (
+                last_freq - c_t[1]
+            ) <= self.tolerance:  # TODO: consider adding a condition here which limits size of chunk
                 chunks[-1].append(c_t[0])
                 continue
             else:
                 chunks.append([c_t[0]])
                 continue
-        
-        return chunks
 
+        return chunks
