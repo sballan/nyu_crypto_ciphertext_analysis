@@ -69,7 +69,7 @@ def decryption_with_histkey(ciphertext, histkey, d_words, plaintext_length=500):
                 while pl < len(m_rchars) - 1 and m_rchars[pl] != " ":
                     pl += 1
 
-                if m_rchars[pl] == " ":
+                if pl < len(m_rchars) and m_rchars[pl] == " ":
                     l_substr = m_rchars[ps:pl]
                     lf_word, lf_dist = match_closest_word(l_substr, d_words)
 
