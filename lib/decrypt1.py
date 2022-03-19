@@ -14,7 +14,7 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
     ciphertext_chardist = HistKeyGen(ciphertext).char_distribution()
 
     best_message = None
-    best_quality = len(ciphertext)
+    best_quality = 1
     best_deckey = {}
     
     # Each dictionary "word" is a complete message for dictionary 1
