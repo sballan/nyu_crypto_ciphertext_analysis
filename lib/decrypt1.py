@@ -34,7 +34,7 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
             else:
                 raise BaseException("deckey is missing a character!")
 
-        distance = Levenshtein.distance(m_rchars, ciphertext)
+        distance = Levenshtein.distance(m_rchars, message)
         quality = distance / len(ciphertext)
 
         if quality < best_quality:
