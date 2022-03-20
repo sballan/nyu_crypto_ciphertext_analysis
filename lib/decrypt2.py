@@ -45,7 +45,7 @@ def decryption_with_histkey(ciphertext, histkey, d_words, plaintext_length=500):
             raise BaseException("deckey is missing a character!")
 
     ps = 0  # start pointer
-    pe = 0  # end pointer
+    pe = 1  # end pointer
     pl = pe  # lookahead pointer
 
     message = []
