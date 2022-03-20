@@ -98,7 +98,7 @@ def decryption_with_histkey(ciphertext, histkey, d_words, plaintext_length=500):
             substring = m_rchars[ps:pe]
 
             f_word, f_dist = match_closest_word(substring, partial_dict_words)
-            match_qualities.append(f_dist / max(len(substring), len(f_word)))
+            match_qualities.append(f_dist / len(substring))
             message.append(f_word)
 
             pe += 1
