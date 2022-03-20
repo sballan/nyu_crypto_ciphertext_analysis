@@ -121,7 +121,7 @@ def decrypt(str):
     min_score = 1000
     for i in range(5):
         score = string_difference(candidates[i], ciphertext)
-        print(score)
+        # print(score)
         if score < min_score:
             candidate = plaintexts[i]
             min_score = score
