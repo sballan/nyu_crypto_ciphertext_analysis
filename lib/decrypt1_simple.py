@@ -26,7 +26,7 @@ def decryption_with_histkey(message, ciphertext, histkey):
 
     distance = Levenshtein.distance(m_rchars, message)
     quality = distance / len(ciphertext)
-    return message, quality
+    return message, quality, deckey
 
 
 @ray.remote
@@ -38,7 +38,7 @@ def decrypt(ciphertext, d_num):
     dictionary = Dictionary(d_num)
 
     CHUNK_SIZE = 1000
-    KEY_LIMIT = 1000
+    KEY_LIMIT = 10000
 
     best_message = None
     best_quality = 1
@@ -46,7 +46,8 @@ def decrypt(ciphertext, d_num):
     
     # Each dictionary "word" is a complete message for dictionary 1
     for message in dictionary.words():
-        hk_generator = HistKeyGen(message, 0)
+        hk_generator = HistKeyGen(message, 1)
+        counter = 0
 
         task_refs = []
         for histkey in hk_generator:
@@ -79,6 +80,6 @@ def decrypt(ciphertext, d_num):
                     best_message = message
                     best_deckey = deckey
 
-        return best_message, best_quality, best_deckey
+    return best_message, best_quality, best_deckey
         
             
