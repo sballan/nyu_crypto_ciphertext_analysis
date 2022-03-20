@@ -9,9 +9,10 @@ class HistKeyGen:
     a bijection between HistKeys and keys.
     """
 
-    def __init__(self, d_text, tolerance=0):
+    def __init__(self, d_text, tolerance=0, first_chunk_size=0):
         self.d_text = d_text
         self.tolerance = tolerance
+        self.first_chunk_size = first_chunk_size
 
         chunks = self.__create_chunks()
 
@@ -110,10 +111,8 @@ class HistKeyGen:
                 chunks[-1].append(c_t[0])
                 continue
 
-            last_freq = char_dist[i - 1][1]
-            if (
-                last_freq - c_t[1]
-            ) <= self.tolerance:  # TODO: consider adding a condition here which limits size of chunk
+            last_freq = char_dist[i - 1][1]          
+            if (i <= self.first_chunk_size) or (last_freq - c_t[1]) <= self.tolerance:
                 chunks[-1].append(c_t[0])
                 continue
             else:
