@@ -46,7 +46,7 @@ def decrypt(ciphertext, d_num):
     
     # Each dictionary "word" is a complete message for dictionary 1
     for message in dictionary.words():
-        hk_generator = HistKeyGen(message, 1)
+        hk_generator = HistKeyGen(message, 0, 2)
         counter = 0
 
         task_refs = []
