@@ -38,7 +38,7 @@ def decrypt(ciphertext, d_num):
     dictionary = Dictionary(d_num)
 
     CHUNK_SIZE = 1000
-    KEY_LIMIT = 10000
+    KEY_LIMIT = 1000
 
     best_message = None
     best_quality = 1
@@ -50,6 +50,7 @@ def decrypt(ciphertext, d_num):
 
         task_refs = []
         for histkey in hk_generator:
+            ref = perform_decryption_with_histkey.remote(message, ciphertext, histkey)
             task_refs.append(ref)
             counter += 1
 
