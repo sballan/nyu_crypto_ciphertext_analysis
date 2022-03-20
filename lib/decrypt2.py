@@ -2,8 +2,8 @@ import Levenshtein
 import ray
 from statistics import mean
 
-from histkey import HistKeyGen
-from dictionary import Dictionary
+from .histkey import HistKeyGen
+from .dictionary import Dictionary
 
 
 def match_closest_word(str, d_words):
