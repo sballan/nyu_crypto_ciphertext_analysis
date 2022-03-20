@@ -2,8 +2,17 @@ import string
 import random
 import Levenshtein
 import os
-import test2
 import csv
+import decrypt1
+import decrypt2
+try: #unix
+    import sys
+    import resource
+    resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+    sys.setrecursionlimit(10**4)
+except ImportError: #everything else
+    import sys
+    sys.setrecursionlimit(10**4)
 
 # this key was generated using the generate_key() function below. It's used to
 # encrypt all the cipher texts in the ciphertext_examples.txt file
@@ -29,11 +38,15 @@ def pic_random_message():
     Choose a random message from the 5 L-symbol candidate plaintexts in plaintext_dictionary_test1. L = 500.
     :return: a 500 letter plaintext message
     """
-    with open("dictionary_1.txt") as f:
-        messages = f.readlines()
+    messages = [
+        "underwaists wayfarings fluty analgia refuels transcribing nibbled okra buttonholer venalness hamlet praus apprisers presifted cubital walloper dissembler bunting wizardries squirrel preselect befitted licensee encumbrances proliferations tinkerer egrets recourse churl kolinskies ionospheric docents unnatural scuffler muches petulant acorns subconscious xyster tunelessly boners slag amazement intercapillary manse unsay embezzle stuccoer dissembles batwing valediction iceboxes ketchups phonily con",
+        "rhomb subrents brasiers render avg tote lesbian dibbers jeopardy struggling urogram furrowed hydrargyrum advertizing cheroots goons congratulation assaulters ictuses indurates wingovers relishes briskly livelihoods inflatable serialized lockboxes cowers holster conciliating parentage yowing restores conformities marted barrettes graphically overdevelop sublimely chokey chinches abstracts rights hockshops bourgeoisie coalition translucent fiascoes panzer mucus capacitated stereotyper omahas produ",
+        "yorkers peccaries agenda beshrews outboxing biding herons liturgies nonconciliatory elliptical confidants concealable teacups chairmanning proems ecclesiastically shafting nonpossessively doughboy inclusion linden zebroid parabolic misadventures fanciers grovelers requiters catmints hyped necklace rootstock rigorously indissolubility universally burrowers underproduced disillusionment wrestling yellowbellied sherpa unburnt jewelry grange dicker overheats daphnia arteriosclerotic landsat jongleur",
+        "cygnets chatterers pauline passive expounders cordwains caravel antidisestablishmentarianism syllabubs purled hangdogs clonic murmurers admirable subdialects lockjaws unpatentable jagging negotiated impersonates mammons chumminess semi pinner comprised managership conus turned netherlands temporariness languishers aerate sadists chemistry migraine froggiest sounding rapidly shelving maligning shriek faeries misogynist clarities oversight doylies remodeler tauruses prostrated frugging comestible ",
+        "ovulatory geriatric hijack nonintoxicants prophylactic nonprotective skyhook warehouser paganized brigading european sassier antipasti tallyho warmer portables selling scheming amirate flanker photosensitizer multistage utile paralyzes indexer backrests tarmac doles siphoned casavas mudslinging nonverbal weevil arbitral painted vespertine plexiglass tanker seaworthiness uninterested anathematizing conduces terbiums wheelbarrow kabalas stagnation briskets counterclockwise hearthsides spuriously s"]
 
     random_pointer = random.randrange(5)
-    return messages[random_pointer].strip()
+    return messages[random_pointer]
 
 
 def letter_to_number(char):
@@ -99,7 +112,7 @@ def create_ciphers(prob_of_random_char):
     This function creates a number of ciphertexts and writes them to a text file, along with their
     plaintext messages separated by a tab. We can use that for analysis.
     """
-    f = open('ciphertext_examples.txt', 'w')
+    f = open('../ciphertext_examples.txt', 'w')
     for i in range(20):
         plaintext = pic_random_message()
         ciphertext = encrypt(plaintext, encryption_key, prob_of_random_char)
@@ -120,7 +133,7 @@ def create_messages_problem2():
         total length would exceed the 500 limit.
     :return: A 500 char string ( message)
     """
-    with open("dictionary_2.txt") as f:
+    with open("../dictionary_2.txt") as f:
         lines = f.readlines()
     words = []
 
@@ -178,7 +191,7 @@ def test_decryption_algorithm(decryption_function, test_type=1):
 
             # Decrypt the cipher text with the decryption_function()
             guessed_message = decryption_function(ciphertext)
-
+            print(message, guessed_message)
             # Calculate the Levenshtein distance and save the result
             levenshtein_distance = Levenshtein.distance(message, guessed_message)
             result = dict()
@@ -215,4 +228,4 @@ def test_decryption_algorithm(decryption_function, test_type=1):
 
 
 
-test_decryption_algorithm(test2.decrypt, 2)
+test_decryption_algorithm(decrypt1.decrypt, 1)
