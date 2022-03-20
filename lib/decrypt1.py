@@ -1,4 +1,7 @@
-def read_dictionary_1(filename = "dictionary_1.txt"):
+import string
+
+
+def read_dictionary_1(filename = "dictionaries/dictionary_1.txt"):
     candidates = []
     with open(filename, "r") as file:
         for line in file:
@@ -7,9 +10,17 @@ def read_dictionary_1(filename = "dictionary_1.txt"):
     return candidates
 
 
+def get_low_res_plaintext():
+    candidates = []
+    with open("dictionaries/dictionary_1_low_res.txt") as file:
+        for line in file:
+            candidates.append(line.strip())
+    return candidates
+
+
 def frequency(str):
     freq = {}
-    for char in string.ascii_lowercase:
+    for char in string.ascii_lowercase+" ":
         freq[char] = 0
     for char in str:
         freq[char] += 1
@@ -25,22 +36,21 @@ def reduce_ciphertext_resolution(str):
     The rest of the characters will be replaced with `2`
     """
     freq = frequency(str)
-
-
-def get_low_res_plaintext():
-    candidates = []
-    with open("dictionary_1_low_res.txt") as file:
-        for line in file:
-            candidates.append(line.strip())
-    return candidates
-
-
-def is_subsequence(a, b):
-    i = 0
-    for char in a:
-        if i < len(b) and char == b[i]:
-            i += 1
-    return i == len(b)
+    freq_sorted = list(freq.keys())
+    freq_sorted.sort(reverse=True, key=lambda k: freq[k])
+    
+    lst0 = "".join(freq_sorted[:5])
+    lst1 = "".join(freq_sorted[5:10])
+    
+    output = []
+    for char in str:
+        if char in lst0:
+            output.append('0')
+        elif char in lst1:
+            output.append('1')
+        else:
+            output.append('2')
+    return "".join(output)
 
 
 def string_difference(a, b):
@@ -76,11 +86,12 @@ def string_difference_helper(a, i_a, b, i_b):
 
 def decrypt(str):
     candidates = candidates_low_res()
+    plaintext = read_dictionary_1()
     ciphertext = reduce_resolution(str)
     
     possible_candidates = []
-    for i in range(len(candidates)):
-        if is_subsequence(candidates[i], ciphertext):
+    for i in range(5):
+        if string_difference(candidates[i], ciphertext):
             possible_candidates.append(i)
     return possible_candidates
 
