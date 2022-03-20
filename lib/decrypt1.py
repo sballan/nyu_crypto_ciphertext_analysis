@@ -1,5 +1,4 @@
 import string
-import Levenshtein
 
 from functools import wraps
 try: #unix
@@ -126,7 +125,7 @@ def decrypt(str):
             candidate = plaintexts[i]
             min_score = score
             
-    return candidate, min_score
+    return candidate
 
 
 if __name__ == "__main__":

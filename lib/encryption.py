@@ -2,8 +2,17 @@ import string
 import random
 import Levenshtein
 import os
-import test2
 import csv
+import decrypt1
+import decrypt2
+try: #unix
+    import sys
+    import resource
+    resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+    sys.setrecursionlimit(10**6)
+except ImportError: #everything else
+    import sys
+    sys.setrecursionlimit(10**6)
 
 # this key was generated using the generate_key() function below. It's used to
 # encrypt all the cipher texts in the ciphertext_examples.txt file
@@ -29,7 +38,7 @@ def pic_random_message():
     Choose a random message from the 5 L-symbol candidate plaintexts in plaintext_dictionary_test1. L = 500.
     :return: a 500 letter plaintext message
     """
-    with open("dictionary_1.txt") as f:
+    with open("../dictionary_1.txt") as f:
         messages = f.readlines()
 
     random_pointer = random.randrange(5)
@@ -99,7 +108,7 @@ def create_ciphers(prob_of_random_char):
     This function creates a number of ciphertexts and writes them to a text file, along with their
     plaintext messages separated by a tab. We can use that for analysis.
     """
-    f = open('ciphertext_examples.txt', 'w')
+    f = open('../ciphertext_examples.txt', 'w')
     for i in range(20):
         plaintext = pic_random_message()
         ciphertext = encrypt(plaintext, encryption_key, prob_of_random_char)
@@ -120,7 +129,7 @@ def create_messages_problem2():
         total length would exceed the 500 limit.
     :return: A 500 char string ( message)
     """
-    with open("dictionary_2.txt") as f:
+    with open("../dictionary_2.txt") as f:
         lines = f.readlines()
     words = []
 
@@ -215,4 +224,4 @@ def test_decryption_algorithm(decryption_function, test_type=1):
 
 
 
-test_decryption_algorithm(test2.decrypt, 2)
+test_decryption_algorithm(decrypt1.decrypt, 1)
