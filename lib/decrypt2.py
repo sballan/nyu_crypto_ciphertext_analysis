@@ -112,7 +112,7 @@ def perform_decryption_with_histkey(ciphertext, histkey, d_words, plaintext_leng
 
 
 def decrypt(ciphertext, d_num, plaintext_length=500):
-    ray.init()
+    ray.init(num_cpus=4)
 
     dictionary = Dictionary(d_num)
     d_words = dictionary.words()

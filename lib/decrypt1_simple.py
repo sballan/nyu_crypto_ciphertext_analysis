@@ -35,6 +35,8 @@ def perform_decryption_with_histkey(message, ciphertext, histkey):
 
 
 def decrypt(ciphertext, d_num):
+    ray.init(num_cpus=4)
+
     dictionary = Dictionary(d_num)
 
     CHUNK_SIZE = 1000
@@ -80,6 +82,7 @@ def decrypt(ciphertext, d_num):
                     best_message = message
                     best_deckey = deckey
 
+    ray.shutdown()
     return best_message, best_quality, best_deckey
         
             
