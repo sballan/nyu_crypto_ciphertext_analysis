@@ -1,5 +1,15 @@
 import string
 
+from functools import wraps
+try: #unix
+    import sys
+    import resource
+    resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+    sys.setrecursionlimit(10**6)
+except ImportError: #everything else
+    import sys
+    sys.setrecursionlimit(10**6)
+
 
 def read_dictionary_1(filename = "dictionaries/dictionary_1.txt"):
     candidates = []
@@ -69,6 +79,19 @@ def string_difference(a, b):
     return string_difference_helper(a, 0, b, 0)
 
 
+def memoize(function):    
+    memo = {}
+
+    @wraps(function)
+    def wrapper(*args):
+        # add the new key to dict if it doesn't exist already  
+        if args not in memo:
+            memo[args] = function(*args)
+        return memo[args]
+    return wrapper
+
+
+@memoize
 def string_difference_helper(a, i_a, b, i_b):
     if i_a == len(a):
         return 0
@@ -85,15 +108,21 @@ def string_difference_helper(a, i_a, b, i_b):
 
 
 def decrypt(str):
-    candidates = candidates_low_res()
-    plaintext = read_dictionary_1()
-    ciphertext = reduce_resolution(str)
+    candidates = get_low_res_plaintext()
+    #print(candidates)
+    plaintexts = read_dictionary_1()
+    #print(plaintexts)
+    ciphertext = reduce_ciphertext_resolution(str)
+    #print(ciphertext)
     
-    possible_candidates = []
+    candidate = "No match"
+    min_score = 1000
     for i in range(5):
-        if string_difference(candidates[i], ciphertext):
-            possible_candidates.append(i)
-    return possible_candidates
+        score = string_difference(candidates[i], ciphertext)
+        print(score)
+        if score < min_score:
+            candidate = plaintexts[i]
+    return candidate
 
 
 if __name__ == "__main__":
