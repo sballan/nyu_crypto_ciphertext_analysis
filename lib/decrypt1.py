@@ -1,4 +1,5 @@
 import string
+import Levenshtein
 
 from functools import wraps
 try: #unix
@@ -116,13 +117,16 @@ def decrypt(str):
     #print(ciphertext)
     
     candidate = "No match"
+    candidate_low_res = ""
     min_score = 1000
     for i in range(5):
         score = string_difference(candidates[i], ciphertext)
         print(score)
         if score < min_score:
             candidate = plaintexts[i]
-    return candidate
+            min_score = score
+            
+    return candidate, min_score
 
 
 if __name__ == "__main__":
