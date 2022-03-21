@@ -112,14 +112,14 @@ def perform_decryption_with_histkey(ciphertext, histkey, d_words, plaintext_leng
 
 
 def decrypt(ciphertext, d_num, plaintext_length=500):
-    ray.init(num_cpus=4)
+    ray.init()
 
     dictionary = Dictionary(d_num)
     d_words = dictionary.words()
     hk_generator = HistKeyGen(dictionary.string(), 1)
 
     CHUNK_SIZE = 10000
-    KEY_LIMIT = 100000
+    KEY_LIMIT = 75000
     counter = 0
     task_refs = []
 

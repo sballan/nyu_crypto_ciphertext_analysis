@@ -37,7 +37,7 @@ def perform_decryption_with_histkey(message, ciphertext, histkey):
 
 
 def decrypt(ciphertext, d_num):
-    ray.init(num_cpus=4)
+    ray.init()
 
     dictionary = Dictionary(d_num)
 
