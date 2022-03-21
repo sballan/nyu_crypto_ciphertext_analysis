@@ -190,8 +190,16 @@ def test_decryption_algorithm(decryption_function, test_type=1):
             ciphertext = encrypt(message, key, random_char_percentage)
 
             # Decrypt the cipher text with the decryption_function()
-            guessed_message = decryption_function(ciphertext)
-            print(message, guessed_message)
+            try:
+                guessed_message = decryption_function(ciphertext,1)
+            except:
+                print("Error decrypting the following message:  ")
+                print("Ciphertext: " + ciphertext)
+                print("Key: " + str(key))
+                # iINDICATE A FAILED DECRYPTION ATTEMPT
+                guessed_message = 'X' * 500
+
+            # Decrypt the cipher text with the decryption_function()
             # Calculate the Levenshtein distance and save the result
             levenshtein_distance = Levenshtein.distance(message, guessed_message)
             result = dict()
@@ -228,4 +236,3 @@ def test_decryption_algorithm(decryption_function, test_type=1):
 
 
 
-test_decryption_algorithm(decrypt1.decrypt, 1)
