@@ -1,14 +1,7 @@
 import string
 
 from functools import wraps
-try: #unix
-    import sys
-    import resource
-    resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
-    sys.setrecursionlimit(10**4)
-except ImportError: #everything else
-    import sys
-    sys.setrecursionlimit(10**4)
+
 
 
 def read_dictionary_1():
