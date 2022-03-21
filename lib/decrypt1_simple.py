@@ -100,12 +100,8 @@ def decrypt(ciphertext, d_num):
     std = statistics.stdev(quality_values[:-1])
     zscore = (statistics.mean(quality_values[:-1]) - quality_values[-1]) / std
 
-    for i, j in message_results:
-        print("Quality is: " + str(j)[:5] + " Message is : %s" % (i[:6]))
-
-    print("Standard Deviation: " + str(std)[:5] + "   Zscore: " + str(zscore)[:6])
     ray.shutdown()
-    return best_message
+    return best_message, zscore
 
-
-encryption.test_decryption_algorithm(decrypt, 1)
+if __name__ == "__main__":
+    encryption.test_decryption_algorithm(decrypt, 1)

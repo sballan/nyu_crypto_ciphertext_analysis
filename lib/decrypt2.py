@@ -118,8 +118,8 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
     d_words = dictionary.words()
     hk_generator = HistKeyGen(dictionary.string(), 1)
 
-    CHUNK_SIZE = 1000
-    KEY_LIMIT = 10000
+    CHUNK_SIZE = 10000
+    KEY_LIMIT = 100000
     counter = 0
     task_refs = []
 
@@ -144,10 +144,10 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
                     best_message = message
                     best_deckey = deckey
 
-            print(f"Processed chunk at {counter}!")
+            #print(f"Processed chunk at {counter}!")
 
         if counter > KEY_LIMIT:
-            print("Finished the chunks!")
+            #print("Finished the chunks!")
             break
 
     # If the keyspace is small, we'll have leftovers
@@ -159,9 +159,9 @@ def decrypt(ciphertext, d_num, plaintext_length=500):
                 best_message = message
                 best_deckey = deckey
 
-        print(f"Processed chunk at {counter + 1}!")
+        #print(f"Processed chunk at {counter + 1}!")
 
-    print("Let's return the chunks")
+    #print("Let's return the chunks")
 
     ray.shutdown()
     return best_message, best_quality, best_deckey
