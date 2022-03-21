@@ -4,7 +4,6 @@
 import ray
 import Levenshtein
 import statistics
-import encryption
 
 from dictionary import Dictionary
 from histkey import HistKeyGen
@@ -103,5 +102,3 @@ def decrypt(ciphertext, d_num):
     ray.shutdown()
     return best_message, zscore
 
-if __name__ == "__main__":
-    encryption.test_decryption_algorithm(decrypt, 1)
